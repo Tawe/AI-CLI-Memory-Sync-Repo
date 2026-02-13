@@ -1,0 +1,18 @@
+flowchart TD
+    A["Edit canonical instructions<br/>.ai/INSTRUCTIONS.md"] --> B["Run sync<br/>npm run ai:sync"]
+    B --> C["scripts/ai-sync.mjs reads source"]
+    C --> D["Prepends GENERATED header"]
+    D --> E["Writes targets"]
+    E --> E1["CLAUDE.md"]
+    E --> E2["GEMINI.md"]
+    E --> E3["AGENTS.md"]
+    E --> E4[".github/copilot-instructions.md"]
+
+    A --> F["Validate without writing<br/>npm run ai:check"]
+    F --> G["Compare generated files to expected content"]
+    G --> H{"In sync?"}
+    H -->|Yes| I["Exit 0<br/>CI passes"]
+    H -->|No| J["Exit 1<br/>CI fails"]
+
+    K["Pull request opened"] --> L["GitHub Action<br/>AI Sync Check"]
+    L --> F

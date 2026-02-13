@@ -1,59 +1,98 @@
-# AI CLI Memory Sync Repo
+# AI CLI Memory Sync
 
-Maintain one canonical instruction file and sync it into the filenames various AI CLIs expect.
+One file to rule your AI instructions.
+
+Keep your assistant guidance in one canonical place, then fan it out to the files each tool expects.
+
+## TL;DR
+
+1. Edit `.ai/INSTRUCTIONS.md`
+2. Run `npm run ai:sync`
+3. Commit generated files
+4. Enforce with `npm run ai:check` in CI
+
+## Why this exists
+
+If you use multiple AI tools, instruction drift is almost guaranteed. This repo removes that drift by making one source of truth and generating the rest.
 
 ## Source of truth
 
-- **Edit:** `.ai/INSTRUCTIONS.md`
-- **Generate:** `npm run ai:sync`
+- Canonical file: `.ai/INSTRUCTIONS.md`
+- Sync script: `scripts/ai-sync.mjs`
 
-## Generated files
+Generated outputs:
 
 | Tool | File |
 |------|------|
 | Claude | `CLAUDE.md` |
 | Gemini | `GEMINI.md` |
-| Codex/Agents | `AGENTS.md` |
+| Codex/Agents (and Warp) | `AGENTS.md` |
 | GitHub Copilot | `.github/copilot-instructions.md` |
 
-## Why
-
-Avoid multiple slightly-different "memory" files scattered across repos. Keep a single source of truth and automatically fan out to tool-specific locations.
-
-## Usage
-
-### Manual sync
+## Quick start
 
 ```bash
+npm install
 npm run ai:sync
 ```
 
-### Check mode (CI-friendly)
-
-```bash
-npm run ai:sync -- --check
-```
-
-Exits non-zero if generated files are missing or out of date.
-
-Shortcut:
+Check for drift (safe for CI):
 
 ```bash
 npm run ai:check
 ```
 
+Run tests:
+
+```bash
+npm test
+```
+
+## Everyday workflow
+
+1. Update `.ai/INSTRUCTIONS.md`.
+2. Run `npm run ai:sync`.
+3. Review changes in generated files.
+4. Commit everything together.
+
+Important:
+- Do not hand-edit generated files. They will be overwritten.
+
+## How the flow works
+
+Source file: `docs/flow.mmd`
+
+```mermaid
+flowchart TD
+    A["Edit canonical instructions<br/>.ai/INSTRUCTIONS.md"] --> B["Run sync<br/>npm run ai:sync"]
+    B --> C["scripts/ai-sync.mjs reads source"]
+    C --> D["Prepends GENERATED header"]
+    D --> E["Writes targets"]
+    E --> E1["CLAUDE.md"]
+    E --> E2["GEMINI.md"]
+    E --> E3["AGENTS.md"]
+    E --> E4[".github/copilot-instructions.md"]
+
+    A --> F["Validate without writing<br/>npm run ai:check"]
+    F --> G["Compare generated files to expected content"]
+    G --> H{"In sync?"}
+    H -->|Yes| I["Exit 0<br/>CI passes"]
+    H -->|No| J["Exit 1<br/>CI fails"]
+
+    K["Pull request opened"] --> L["GitHub Action<br/>AI Sync Check"]
+    L --> F
+```
+
 ## Automation options
 
-### Pre-commit hook (recommended)
-
-Use [Husky](https://typicode.github.io/husky/) to ensure sync happens on every commit:
+Pre-commit with [Husky](https://typicode.github.io/husky/):
 
 ```bash
 npm i -D husky
 npx husky init
 ```
 
-Edit `.husky/pre-commit`:
+Suggested `.husky/pre-commit`:
 
 ```bash
 #!/usr/bin/env sh
@@ -63,34 +102,17 @@ npm run ai:sync
 git add CLAUDE.md GEMINI.md AGENTS.md .github/copilot-instructions.md
 ```
 
-### CI safety net
-
-In your CI pipeline:
-
-```bash
-npm run ai:check
-```
-
-This will fail the build if generated files are out of sync.
-
-This repo also includes a GitHub Actions workflow at `.github/workflows/ai-sync-check.yml` that runs on pull requests.
-
-## Testing
-
-Run the test suite for the sync script:
-
-```bash
-npm test
-```
+PR safety net:
+- GitHub Actions workflow: `.github/workflows/ai-sync-check.yml`
+- Runs `npm run ai:check` on pull requests
 
 ## Goals
 
-- Keep a single canonical file (`.ai/INSTRUCTIONS.md`)
-- Generate tool-specific instruction files on demand
-- Optionally run sync automatically on commit
-- Work cleanly on macOS/Linux; remain usable for teams with Windows machines
+- Keep a single canonical instructions file
+- Generate tool-specific files predictably
+- Make drift obvious in local dev and CI
 
 ## Non-goals
 
-- Tool-specific deep integrations or calling CLIs
-- Attempting to discover every AI tool's conventions
+- Calling AI CLIs directly
+- Supporting every possible tool convention
