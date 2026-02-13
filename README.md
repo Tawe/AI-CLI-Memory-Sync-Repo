@@ -42,6 +42,12 @@ Check for drift (safe for CI):
 npm run ai:check
 ```
 
+Watch and auto-sync on source changes:
+
+```bash
+npm run ai:watch
+```
+
 Run tests:
 
 ```bash
@@ -104,7 +110,7 @@ git add CLAUDE.md GEMINI.md AGENTS.md .github/copilot-instructions.md
 
 PR safety net:
 - GitHub Actions workflow: `.github/workflows/ai-sync-check.yml`
-- Runs `npm run ai:check` on pull requests
+- Runs `npm install` and `npm run ai:check` on pull requests
 
 ## Goals
 
