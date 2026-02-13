@@ -1,3 +1,5 @@
+<img src="aisync2.png" alt="AI CLI Memory Sync Repo" width="100%" />
+
 # AI CLI Memory Sync
 
 One file to rule your AI instructions.
