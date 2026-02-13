@@ -1,0 +1,22 @@
+{
+  "name": "ai-cli-memory-sync",
+  "version": "1.0.0",
+  "description": "Maintain one canonical instruction file and sync it into the filenames various AI CLIs expect",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ai:sync": "node scripts/ai-sync.mjs",
+    "ai:check": "node scripts/ai-sync.mjs --check",
+    "test": "node --test"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "claude",
+    "gemini",
+    "copilot",
+    "codex",
+    "instructions"
+  ],
+  "license": "MIT"
+}
